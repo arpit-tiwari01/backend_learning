@@ -5,7 +5,16 @@ import connectDB from "./db/index.js"
 dotenv.config({
     path:'/.env'
 })
-connectDB();
+connectDB()
+.then(()=>{
+    app.listen(process.env.PORT || 5000,()=>{
+        console.log(`App is listening on port ${process.env.PORT}`)
+    })
+})
+.catch((err)=>{
+    console.error("MONGO DB connection failed !!! :", err)
+    throw err
+})
 
 
 
