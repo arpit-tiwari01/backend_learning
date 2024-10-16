@@ -2,23 +2,21 @@ class ApiError extends Error {
     constructor(
         statusCode,
         message = "An unknown error occurred!",
-        error =[],
-        statck = ""
-    ){
+        error = [],
+        stack = ""
+    ) {
         super(message);
         this.statusCode = statusCode;
-        this.data=null;
+        this.data = null;
+        this.message = message;
         this.success = false;
-        this.stack = stack;
 
-        if(stack){
+        if (stack) {
             this.stack = stack;
-        }else{
+        } else {
             Error.captureStackTrace(this, this.constructor);
         }
-
     }
-
 }
 
 export { ApiError };
