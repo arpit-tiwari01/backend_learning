@@ -19,6 +19,7 @@ app.use(
     limit: "16Kb",
   })
 );
+app.use(cookieParser());
 
 // Routes import
 import userRouter from "./routes/user.routes.js";
