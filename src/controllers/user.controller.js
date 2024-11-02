@@ -20,7 +20,6 @@ const generateAccessAndRefreshToken = async (userID) => {
 
     return { accessToken, refreshToken };
   } catch (error) {
-    console.error("Detailed Error:", error); // Added for debugging
     throw new ApiError(500, "Error generating access and refresh tokens");
   }
 };
@@ -95,7 +94,6 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid credentials");
   }
-  console.log(user);
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
@@ -152,7 +150,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
-  console.log(incomingRefreshToken)
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request");
   }
