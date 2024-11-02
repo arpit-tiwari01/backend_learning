@@ -2,8 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { ApiResponse } from "../utils/ApiResponce.js";
-import { jwt } from "jsonwebtoken";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt  from "jsonwebtoken";
 import mongoose from "mongoose";
 
 // Helper function to generate access and refresh tokens
@@ -128,7 +128,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { refreshToken: undefined },
+      $unset: { 
+        refreshToken: 1 } //this remove the field from document
     },
     {
       new: true,
@@ -149,8 +150,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 // refresh access token
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
+  console.log(incomingRefreshToken)
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request");
   }
@@ -161,9 +163,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const user = await User.findById(decodedToken._id);
+    const user = await User.findById(decodedToken?._id);
 
-    if (user) {
+    if (!user) {
       throw new ApiError(401, "invalid refresh token");
     }
 
@@ -306,6 +308,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "cover Image updated successfully"));
 });
 
+//get user channel profile
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
@@ -366,7 +369,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, channel[0], "user channel fetched successfully"));
 });
 
-
+//get watchHistory
 const getWatchHistory = asyncHandler(async (req, res) =>{
   const user = await User.aggregate([
     {
