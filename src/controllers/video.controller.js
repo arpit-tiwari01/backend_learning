@@ -54,9 +54,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
 
-  // Debug log: check if title and description are received
-  console.log("Received title:", title);
-  console.log("Received description:", description);
 
   if (!title || !description) {
     throw new ApiError(400, "Title and description are required");
