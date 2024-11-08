@@ -52,9 +52,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 // Upload video on Cloudinary
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, category, tags } = req.body;
 
-
+  // Validate title and description
   if (!title || !description) {
     throw new ApiError(400, "Title and description are required");
   }
@@ -69,13 +69,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
     const thumbnailLocalPath = req.files.thumbnail[0].path;
 
     // Upload video to Cloudinary
-    const uploadVideo = await uploadOnCloudinary(videoLocalPath);
+    const uploadVideo = await uploadOnCloudinary(videoLocalPath, { resource_type: "video" });
     const videoDuration = uploadVideo.duration;
 
     // Upload thumbnail to Cloudinary
     const uploadThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
-    // Create new video document
+    // Create new video document with additional fields
     const video = new Video({
       title,
       description,
@@ -83,18 +83,23 @@ const publishAVideo = asyncHandler(async (req, res) => {
       cloudinaryId: uploadVideo.public_id,
       thumbnail: uploadThumbnail.url,
       duration: videoDuration,
-      owner: req.user.id,
+      category: category || "Uncategorized",
+      tags: tags ? tags.split(",") : [], // Convert comma-separated string to array
+      views: 0, // Default views count
+      likes: 0, // Default likes count
+      dislikes: 0, // Default dislikes count
+      isPublished: true, // Default to published
+      owner: req.user.id, // Set the owner to the authenticated user's ID
     });
 
     const savedVideo = await video.save();
 
-    res
-      .status(201)
-      .json(new ApiResponse(201, savedVideo, "Video published successfully"));
+    res.status(201).json(new ApiResponse(201, savedVideo, "Video published successfully"));
   } catch (error) {
     throw new ApiError(500, "Failed to upload video");
   }
 });
+
 
 // Get video by ID
 const getVideoById = asyncHandler(async (req, res) => {
@@ -122,7 +127,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 // Update video
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  const { title, description, thumbnail } = req.body;
+  const { title, description} = req.body;
 
   if (!isValidObjectId(videoId)) {
     throw new ApiError(400, "Invalid video ID");
@@ -144,9 +149,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     if (req.file) {
       const thumbnailLocalPath = req.file.path;
-      const uploadResult = await uploadOnCloudinary(thumbnailLocalPath, {
-        folder: "thumbnails",
-      });
+      const uploadResult = await uploadOnCloudinary(thumbnailLocalPath);
 
       video.thumbnail = uploadResult.secure_url;
       video.cloudinaryThumbnailId = uploadResult.public_id;
