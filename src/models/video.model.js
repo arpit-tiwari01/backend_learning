@@ -31,14 +31,6 @@ const videoSchema = new Schema(
       type: Number,
       default: 0,
     },
-    likes: {
-      type: Number,
-      default: 0,
-    },
-    dislikes: {
-      type: Number,
-      default: 0,
-    },
     tags: [String], // Array of tags
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }], // Array of comment references
     owner: {
