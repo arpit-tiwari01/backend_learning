@@ -101,6 +101,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, savedVideo, "Video published successfully"));
   } catch (error) {
+    console.error(error);
     throw new ApiError(500, "Failed to upload video");
   }
 });
